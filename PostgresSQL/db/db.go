@@ -9,7 +9,6 @@ import (
 
 var DB *sql.DB
 
-// InitDB initializes the database connection and creates tables if they do not exist.
 func InitDB() error {
 	var err error
 

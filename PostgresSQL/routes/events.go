@@ -101,7 +101,7 @@ func AddRegistration(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return
 	}
-	event, err := models.GetEventByID(id)
+	event, err := models.GetUserById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Event not found"})
 		return

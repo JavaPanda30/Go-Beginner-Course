@@ -16,6 +16,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	user.ID = 1
+
 	if err := user.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not save User", "error": err.Error()})
 		return
@@ -69,6 +70,21 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Login Successfull", "user": user, "token": token})
 }
 
-// func GetUserEvents(ctx *gin.Context){
-// 	var events []models.Event
-// }
+func GetRegisteredUsersForTheEvent(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot Parse ID"})
+		return
+	}
+	var users []models.User
+	users, err = models.GetRegistrationByEventID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var idVal []int64
+	for _, user := range users {
+		idVal = append(idVal, user.ID)
+	}
+	c.JSON(http.StatusOK, gin.H{"registered_users": idVal})
+}

@@ -68,7 +68,3 @@ func Login(c *gin.Context) {
 	}
 	c.JSON(http.StatusAccepted, gin.H{"message": "Login Successfull", "user": user, "token": token})
 }
-
-// func GetUserEvents(ctx *gin.Context){
-// 	var events []models.Event
-// }

@@ -9,24 +9,22 @@ import (
 
 type User struct {
 	ID       int64  `json:"id"`
-	UserName string `json:"username"`
+	Name     string `json:"name"`
 	Email    string `binding:"required" json:"email"`
 	Password string `binding:"required" json:"password"`
 }
 
-func (u *User) Save() error {
-	query := `INSERT INTO user(name,email,password) VALUES (?, ?, ?)`
-	stmt, err := db.DB.Prepare(query)
+func (user *User) Save() error {
+	hashedPassword, err := util.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
-	u.Password, _ = util.HashPassword(u.Password)
-	defer stmt.Close()
-	res, err := stmt.Exec(u.UserName, u.Email, u.Password)
-	if err != nil {
-		return err
-	}
-	u.ID, err = res.LastInsertId()
+	user.Password = hashedPassword
+	query := `
+    INSERT INTO users (name, email, password) 
+    VALUES ($1, $2, $3)
+    RETURNING id`
+	err = db.DB.QueryRow(query, user.Name, user.Email, user.Password).Scan(&user.ID)
 	if err != nil {
 		return err
 	}
@@ -34,7 +32,7 @@ func (u *User) Save() error {
 }
 
 func GetAllUsers() ([]User, error) {
-	query := `SELECT * FROM user`
+	query := `SELECT * FROM users`
 	row, err := db.DB.Query(query)
 	if err != nil {
 		return []User{}, err
@@ -43,7 +41,7 @@ func GetAllUsers() ([]User, error) {
 	var users []User
 	for row.Next() {
 		var user User
-		err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password)
+		err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +59,7 @@ func GetUserById(id int64) (User, error) {
 	defer row.Close()
 	for row.Next() {
 		var user User
-		err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password)
+		err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 		if err != nil {
 			return User{}, err
 		}
@@ -73,24 +71,17 @@ func GetUserById(id int64) (User, error) {
 }
 
 func Delete(id int64) (User, error) {
-	query := `DELETE FROM user WHERE id=?`
-	stmt, err := db.DB.Prepare(query)
+	query := `DELETE FROM users WHERE id=$1 RETURNING id, name, email, password`
+	var user User
+	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 	if err != nil {
-		return User{}, err
-	}
-	user, err := GetUserById(id)
-	if err != nil {
-		return User{}, err
-	}
-	defer stmt.Close()
-	if _, err := stmt.Exec(id); err != nil {
 		return User{}, err
 	}
 	return user, nil
 }
 
 func (u *User) ValidateCredentials() error {
-	query := `SELECT id,password FROM user WHERE email=?`
+	query := `SELECT id,password FROM users WHERE email=$1`
 	row := db.DB.QueryRow(query, u.Email)
 	var hashpassword string
 	err := row.Scan(&u.ID, &hashpassword)
@@ -103,8 +94,3 @@ func (u *User) ValidateCredentials() error {
 	}
 	return nil
 }
-
-// func (u *User) GetEventsCreatedByUserId() ([]Event, error) {
-// 	// query=`SELECT * FROM events WHERE userId=?`
-
-// }
