@@ -78,9 +78,7 @@ func GetUserInput(prompt string) (string, error) {
 	return text, nil
 }
 
-//
-
-// if we want any type of value
+// if we want any type of value - any or interface{}
 
 func printSomething(value interface{}) {
 	switch value.(type) {

@@ -13,14 +13,14 @@ func getBalanceFromFile() (float64, error) {
 	data, err := os.ReadFile(accountBalanceFile)
 
 	if err != nil {
-		return 1000, errors.New("Failed to find balance file.")
+		return 0, errors.New("Failed to find balance file.")
 	}
 
 	balanceText := string(data)
 	balance, err := strconv.ParseFloat(balanceText, 64)
 
 	if err != nil {
-		return 1000, errors.New("Failed to parse stored balance value.")
+		return 0, errors.New("Failed to parse stored balance value.")
 	}
 
 	return balance, nil
@@ -52,6 +52,7 @@ func main() {
 		var choice int
 		fmt.Print("Your choice: ")
 		fmt.Scan(&choice)
+		
 		switch choice {
 		case 1:
 			fmt.Println("Your balance is", accountBalance)
@@ -66,7 +67,7 @@ func main() {
 				continue
 			}
 
-			accountBalance += depositAmount 
+			accountBalance += depositAmount
 			fmt.Println("Balance updated! New amount:", accountBalance)
 			writeBalanceToFile(accountBalance)
 		case 3:

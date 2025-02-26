@@ -11,12 +11,15 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	err=store.DbInit()
+
+	err = store.CreateAccountTable()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
 	fmt.Printf("%+v\n", store)
-	server := NewAPIServer(":3000")
+
+	server := NewAPIServer(":3000", store)
 	server.run()
 }

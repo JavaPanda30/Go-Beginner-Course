@@ -9,7 +9,8 @@ func main() {
 	fmt.Print("Age: ")
 	agepointer := &age
 	fmt.Println(age)
-	fmt.Println(agepointer) //will give value as pointer to pointer gives original value
+	fmt.Println(agepointer) 
+	//will give value as pointer to pointer gives original value
 	fmt.Println(val(agepointer))
 	editAge(agepointer)
 	fmt.Println(age)
@@ -20,5 +21,6 @@ func val(age *int) int {
 }
 
 func editAge(age *int) {
-	*age = *age + 10 // no return but will still edit the age directly into the strings
+	*age = *age + 10 
+	// no return but will still edit the age directly into the strings
 }
